@@ -1,11 +1,10 @@
 import os
-import datetime
 from crewai import Agent, Task, Crew, Process
 from openai import OpenAI
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-def gorsel_uret(prompt_metni, dosya_adi):
+def gorsel_uret(prompt_metni):
     try:
         response = client.images.generate(
             model="dall-e-3",
@@ -14,10 +13,9 @@ def gorsel_uret(prompt_metni, dosya_adi):
             size="1024x1024",
             quality="hd"
         )
-        image_url = response.data.url
-        return f"![Tasarım]({image_url})\n\n[Görseli Yüksek Kalitede İndirmek İçin Tıklayın]({image_url})"
+        return response.data.url
     except Exception as e:
-        return f"Görsel üretilemedi, hata: {str(e)}"
+        return f"Görsel üretilemedi: {str(e)}"
 
 arge_ajani = Agent(
     role='Etsy POD Trend Analisti',
@@ -55,7 +53,7 @@ gorev1 = Task(
 
 gorev2 = Task(
     description="Belirlenen trend için DALL-E 3 komutu hazırla. Komut kesinlikle şunları içermelidir: 'Vibrant colors, high contrast, clean solid background, sharp edges, suitable for DTF t-shirt printing, isolated design'. Yalnızca İngilizce prompt metnini çıktı olarak ver.",
-    expected_output='DALL-E 3 için sadece İngilizce görsel üretim promptu.',
+    expected_output='DALL-E 3 için sadece İngilizce görsel promptu.',
     agent=tasarimci_ajan
 )
 
@@ -78,26 +76,24 @@ etsy_sirketi = Crew(
 )
 
 if __name__ == "__main__":
-    print("🚀 Yeni Nesil Görsel Üretimli Yapay Zeka Şirketi Çalışmaya Başlıyor...")
+    print("🚀 Yapay Zeka Şirketi Çalışmaya Başlıyor...")
     sonuc = etsy_sirketi.kickoff()
     
-    print("🎨 Görseller Canlı Olarak Üretiliyor...")
-    ana_tasarim_linki = gorsel_uret(str(sonuc), "ana_tasarim.png")
+    print("🎨 Görsel Arka Planda Üretiliyor...")
+    # Görsel komutunu otomatik alıp DALL-E'ye gönderiyoruz
+    gorsel_linki = gorsel_uret(str(sonuc))
     
-    rapor_metni = f"""# 📈 ETSY GÜNLÜK ÜRETİM VE MAĞAZA RAPORU
-
-## 🎯 1. AR-GE & SEO SONUÇLARI
-{sonuc}
-
-## 👕 2. ÜRETİLEN ANA TASARIM (DTF BASKIYA UYGUN)
-{ana_tasarim_linki}
-"""
+    # GitHub'ın özel raporlama ekranına yazdırılacak format
+    rapor_metni = f"""
+    echo "### 📈 ETSY GÜNLÜK ÜRETİM RAPORU" >> $GITHUB_STEP_SUMMARY
+    echo "" >> $GITHUB_STEP_SUMMARY
+    echo "#### 🎯 1. AR-GE & SEO SONUÇLARI" >> $GITHUB_STEP_SUMMARY
+    echo "{str(sonuc).replace('"', '\\"')}" >> $GITHUB_STEP_SUMMARY
+    echo "" >> $GITHUB_STEP_SUMMARY
+    echo "#### 👕 2. ÜRETİLEN ANA TASARIM (DTF BASKI)" >> $GITHUB_STEP_SUMMARY
+    echo "[Tasarımı Yüksek Kalitede İndirmek İçin Tıklayın]({gorsel_linki})" >> $GITHUB_STEP_SUMMARY
+    """
     
-    # Tarih bazlı dinamik dosya adı oluşturma
-    bugun = datetime.datetime.now().strftime("%d_%m_%Y")
-    dosya_adi = f"rapor_{bugun}.md"
-    
-    with open(dosya_adi, "w", encoding="utf-8") as f:
+    # Bu komutları GitHub'ın okuyabileceği geçici bir dosyaya yazıyoruz
+    with open("ekrana_yaz.sh", "w", encoding="utf-8") as f:
         f.write(rapor_metni)
-        
-    print(f"✅ İşlem Tamamlandı! Rapor '{dosya_adi}' dosyasına kaydedildi.")
