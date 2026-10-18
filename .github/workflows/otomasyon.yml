@@ -1,12 +1,14 @@
 name: Etsy Yapay Zeka Sirketi Gunluk Calisma
 on:
   schedule:
-    - cron: '0 9 * * *' # Her sabah Türkiye saati ile sabah 12:00 civarı tetiklenir
-  workflow_dispatch: # İstediğiniz zaman elle de başlatabilmeniz için buton ekler
+    - cron: '0 9 * * *'
+  workflow_dispatch:
 
 jobs:
   run-company:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Kodları indir
         uses: actions/checkout@v3
@@ -24,3 +26,11 @@ jobs:
         run: python main.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Dosyaları Depoya Geri Yükle
+        run: |
+          git config --global user.name 'Etsy AI Bot'
+          git config --global user.email 'bot@etsy.ai'
+          git add .
+          git commit -m "Otomatik Günlük Rapor ve Tasarımlar Eklendi" || exit 0
+          git push
