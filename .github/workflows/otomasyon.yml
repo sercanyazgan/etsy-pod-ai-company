@@ -25,8 +25,5 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Raporu ve Tasarımları İndirilebilir Paket Yap
-        uses: actions/upload-artifact@v4
-        with:
-          name: Gunluk-Etsy-Tasarim-Paketi
-          path: rapor_*.md
+      - name: Raporu Ekrana Kilitle
+        run: bash ekrana_yaz.sh
