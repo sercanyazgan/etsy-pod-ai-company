@@ -17,54 +17,62 @@ def gorsel_uret(prompt_metni):
     except Exception as e:
         return f"Görsel üretilemedi: {str(e)}"
 
+# 1. AJAN: Strateji ve Pazar Analizi
 arge_ajani = Agent(
-    role='Etsy POD Trend Analisti',
-    goal='Etsy verilerine göre en çok satacak ve yüksek canlılıkta DTF baskıya uygun niş konuları bulmak.',
-    backstory='Sektörde trendleri önceden tahmin eden e-ticaret uzmanı.',
+    role='Etsy Pazar ve Bölge Stratejisti',
+    goal='Amerika satış haritasına göre LoomifyTotes (Bez Çanta) ve LoomifyGifts (Giyim) mağazaları için bölgesel trendleri analiz etmek.',
+    backstory='Bölgesel satış verilerini (Midwest kamp kültürü, California Y2K/Brainrot trendleri, NY şehir hayatı vb.) ürün stratejisine dönüştüren uzman.',
     verbose=True
 )
 
+# 2. AJAN: Tasarım ve Kreatif
 tasarimci_ajan = Agent(
-    role='DTF Baskı Tasarım Uzmanı',
-    goal='DTF baskı standartlarına uygun (canlı renkler, temiz kenarlar, kolay dekupe edilebilir arka plan) tişört tasarım görselleri üretmek.',
-    backstory='Tekstil baskı teknolojilerine ve yapay zeka görsel üretimine hakim kreatif tasarımcı.',
+    role='Kreatif Tasarım Direktörü',
+    goal='Belirlenen mağaza ve bölge stratejisine uygun, basıma hazır (kanvas dokusu veya DTF hoodie) yüksek kaliteli görsel konseptleri üretmek.',
+    backstory='Farklı materyallerin baskı dinamiklerini bilen ve hedef kitlenin görsel mizah anlayışına (GenZ, Midwest Nice vb.) hakim yapay zeka tasarım uzmanı.',
     verbose=True
 )
 
+# 3. AJAN: Sunum ve Mockup
 mockup_ajani = Agent(
-    role='Etsy Listeleme ve Mockup Tasarımcısı',
-    goal='Üretilen ana tasarımı alıp; Lifestyle model üzerinde, Flatlay tarzında ve detay gösteren yakın çekim satış görselleri (mockup) hazırlamak.',
-    backstory='E-ticarette satışı artıran görsel psikolojisini çok iyi bilen fotoğraf ve grafik uzmanı.',
+    role='Etsy Mockup ve Sunum Uzmanı',
+    goal='Üretilen tasarıma ve hedef bölgenin kültürüne uygun (örn: NY kahve dükkanı, California sahili veya Midwest göl kenarı) mockup senaryoları hazırlamak.',
+    backstory='Görsel psikolojiyi kullanarak müşterinin ürünle bağ kurmasını sağlayan ve dönüşüm oranlarını artıran sanat yönetmeni.',
     verbose=True
 )
 
+# 4. AJAN: SEO ve Metin
 seo_ajani = Agent(
-    role='Etsy SEO ve Listeleme Uzmanı',
-    goal='Tasarım fikirlerine ve görsellere uygun İngilizce başlık, 13 adet etiket (tags) ve açıklama yazmak.',
-    backstory='Etsy algoritmasını çok iyi bilen, ürünleri aramalarda en üst sıraya çıkaran pazarlama uzmanı.',
+    role='SEO ve Listeleme Uzmanı',
+    goal='Hedef bölgenin arama alışkanlıklarına ve kültürüne uygun İngilizce başlık, açıklama ve 13 adet niş etiket (tags) oluşturmak.',
+    backstory='Etsy algoritmasını bölgesel anahtar kelimelerle (örn: midwest cozy hoodie, aesthetic canvas shopper) manipüle edebilen pazarlamacı.',
     verbose=True
 )
 
+# GÖREV 1: Strateji Belirleme
 gorev1 = Task(
-    description='Etsy üzerinde DTF baskı ile tişörtlerde harika duracak, renkleri canlı ve bu hafta çok satabilecek 1 adet niş konu belirle.',
-    expected_output='Detaylı trend niş konusu raporu.',
+    description='Amerika satış haritamıza göre: Ya LoomifyTotes mağazası için (California/New York bölgesi, çevre bilinci, üniversite, tote bag) ya da LoomifyGifts mağazası için (Chicago/Midwest bölgesi, kalın kışlık giyim, kamp, doğa, lokal mizah) harika satacak 1 adet spesifik niş konu ve ürün türü belirle.',
+    expected_output='Seçilen mağaza, hedef bölge ve detaylı trend niş konusu raporu.',
     agent=arge_ajani
 )
 
+# GÖREV 2: DALL-E Prompt Üretimi
 gorev2 = Task(
-    description="Belirlenen trend için DALL-E 3 komutu hazırla. Komut kesinlikle şunları içermelidir: 'Vibrant colors, high contrast, clean solid background, sharp edges, suitable for DTF t-shirt printing, isolated design'. Yalnızca İngilizce prompt metnini çıktı olarak ver.",
+    description="Belirlenen niş ve ürün türü (bez çanta veya hoodie) için DALL-E 3 promptu hazırla. Komut şunları içermelidir: 'Vibrant colors, clean solid background, isolated design, clean edges'. Yalnızca İngilizce prompt metnini çıktı olarak ver.",
     expected_output='DALL-E 3 için sadece İngilizce görsel promptu.',
     agent=tasarimci_ajan
 )
 
+# GÖREV 3: Mockup Prompt Üretimi
 gorev3 = Task(
-    description="Ana tasarıma uygun olarak Etsy'de yüksek satış getirecek 3 farklı mockup promptu hazırla: 1. Lifestyle model wearing the t-shirt close up. 2. Aesthetic flatlay layout of the t-shirt. 3. Macro detailed texture close up. Yalnızca İngilizce prompt metinlerini liste halinde ver.",
+    description="Ana tasarıma ve hedef bölgenin ruhuna uygun 3 farklı mockup promptu hazırla: 1. Lifestyle model (bölgeye uygun arka planla). 2. Aesthetic flatlay. 3. Macro detay. Yalnızca İngilizce prompt metinlerini liste halinde ver.",
     expected_output='3 adet mockup senaryosu içeren İngilizce prompt listesi.',
     agent=mockup_ajani
 )
 
+# GÖREV 4: SEO Optimizasyonu
 gorev4 = Task(
-    description='Ürün için Etsy standartlarında 1 adet İngilizce başlık, 13 adet etiket ve SEO uyumlu ürün açıklaması yaz.',
+    description='Seçilen ürün ve hedef bölge için Etsy standartlarında 1 adet İngilizce başlık, 13 adet bölgesel trendlere uygun etiket ve SEO uyumlu ürün açıklaması yaz.',
     expected_output='Başlık, etiketler ve açıklama metni.',
     agent=seo_ajani
 )
@@ -80,20 +88,4 @@ if __name__ == "__main__":
     sonuc = etsy_sirketi.kickoff()
     
     print("🎨 Görsel Arka Planda Üretiliyor...")
-    # Görsel komutunu otomatik alıp DALL-E'ye gönderiyoruz
-    gorsel_linki = gorsel_uret(str(sonuc))
-    
-    # GitHub'ın özel raporlama ekranına yazdırılacak format
-    rapor_metni = f"""
-    echo "### 📈 ETSY GÜNLÜK ÜRETİM RAPORU" >> $GITHUB_STEP_SUMMARY
-    echo "" >> $GITHUB_STEP_SUMMARY
-    echo "#### 🎯 1. AR-GE & SEO SONUÇLARI" >> $GITHUB_STEP_SUMMARY
-    echo "{str(sonuc).replace('"', '\\"')}" >> $GITHUB_STEP_SUMMARY
-    echo "" >> $GITHUB_STEP_SUMMARY
-    echo "#### 👕 2. ÜRETİLEN ANA TASARIM (DTF BASKI)" >> $GITHUB_STEP_SUMMARY
-    echo "[Tasarımı Yüksek Kalitede İndirmek İçin Tıklayın]({gorsel_linki})" >> $GITHUB_STEP_SUMMARY
-    """
-    
-    # Bu komutları GitHub'ın okuyabileceği geçici bir dosyaya yazıyoruz
-    with open("ekrana_yaz.sh", "w", encoding="utf-8") as f:
-        f.write(rapor_metni)
+    # Görsel komutunu otomatik alıp
