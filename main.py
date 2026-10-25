@@ -1,23 +1,7 @@
 import os
 from crewai import Agent, Task, Crew, Process
-from openai import OpenAI
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
-def gorsel_uret(prompt_metni):
-    try:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt_metni,
-            n=1,
-            size="1024x1024",
-            quality="hd"
-        )
-        return response.data.url
-    except Exception as e:
-        return f"Görsel üretilemedi: {str(e)}"
-
-# AJANLAR (Rolleri ve yetenekleri sabit olduğu için bir kez tanımlıyoruz)
+# AJANLAR
 arge_ajani = Agent(
     role='Etsy Pazar ve Bölge Stratejisti',
     goal='Verilen mağaza konseptine ve bölgesel hedeflere uygun, yüksek dönüşüm getirecek trend nişler bulmak.',
@@ -27,22 +11,22 @@ arge_ajani = Agent(
 
 tasarimci_ajan = Agent(
     role='Kreatif Tasarım Direktörü',
-    goal='Mağazanın ürün tipine (bez çanta veya giyim) uygun, basıma hazır yüksek kaliteli görsel konseptleri üretmek.',
-    backstory='Farklı materyallerin baskı dinamiklerini bilen ve niş kitlelerin mizah/estetik anlayışına hakim yapay zeka tasarım uzmanı.',
+    goal='Mağazanın ürün tipine uygun, Midjourney gibi yapay zeka araçlarında kullanılmak üzere mükemmel İngilizce görsel promptları yazmak.',
+    backstory='Farklı materyallerin baskı dinamiklerini bilen ve prompt mühendisliğinde uzman yapay zeka tasarım direktörü.',
     verbose=True
 )
 
 mockup_ajani = Agent(
     role='Etsy Mockup ve Sunum Uzmanı',
-    goal='Üretilen tasarıma ve ürün gamına uygun mockup senaryoları hazırlamak.',
+    goal='Üretilen tasarıma ve ürün gamına uygun, listeleme kapağı ve diğer görseller için detaylı mockup promptları hazırlamak.',
     backstory='Görsel psikolojiyi kullanarak müşterinin ürünle bağ kurmasını sağlayan sanat yönetmeni.',
     verbose=True
 )
 
 seo_ajani = Agent(
-    role='SEO ve Listeleme Uzmanı',
-    goal='Ürün tipine ve hedef bölgenin arama alışkanlıklarına uygun İngilizce başlık, açıklama ve 13 adet niş etiket oluşturmak.',
-    backstory='Etsy algoritmasını bölgesel anahtar kelimelerle manipüle edebilen pazarlamacı.',
+    role='SEO ve Raporlama Uzmanı',
+    goal='Tüm ekibin ürettiği promptları ve SEO verilerini (Başlık, Etiket, Açıklama) tek bir düzgün rapor halinde sunmak.',
+    backstory='Etsy algoritmasını bölgesel anahtar kelimelerle manipüle edebilen ve verileri mükemmel özetleyen pazarlamacı.',
     verbose=True
 )
 
@@ -65,41 +49,38 @@ if __name__ == "__main__":
     
     github_summary = os.environ.get("GITHUB_STEP_SUMMARY")
     
-    # Raporun başlığını bir kez yazdırıyoruz
     if github_summary:
         with open(github_summary, "a", encoding="utf-8") as f:
             f.write("## 🏢 ETSY AJANSI GÜNLÜK ÜRETİM RAPORU\n\n")
 
-    # Her mağaza için ajansı sırayla çalıştırıyoruz
     for magaza in magazalar:
         print(f"📁 Dosya Açılıyor: {magaza['adi']} Stratejisi İşleniyor...")
         
-        # GÖREVLER (Her mağazanın kendi dinamiklerine göre baştan tanımlanıyor)
+        # GÖREVLER
         gorev1 = Task(
             description=f"Şu an {magaza['adi']} mağazası için çalışıyorsun. Satılan ürünler: {magaza['urun_tipleri']}. Hedef Bölge/Kitle: {magaza['hedef_bolge']}. Bu dinamiklere uygun, bu hafta çok satacak 1 adet spesifik niş konu belirle.",
-            expected_output='Detaylı trend niş konusu raporu.',
+            expected_output='Detaylı trend niş konusu.',
             agent=arge_ajani
         )
 
         gorev2 = Task(
-            description=f"Belirlenen niş ve '{magaza['urun_tipleri']}' ürünleri için DALL-E 3 promptu hazırla. Komut şunları içermelidir: 'Vibrant colors, clean solid background, isolated design, clean edges'. Yalnızca İngilizce prompt metnini çıktı olarak ver.",
-            expected_output='DALL-E 3 için sadece İngilizce görsel promptu.',
+            description=f"Belirlenen niş ve '{magaza['urun_tipleri']}' ürünleri için başka bir yapay zeka aracında (Midjourney vb.) kullanılmak üzere 1 adet yüksek kaliteli İngilizce ANA TASARIM PROMPTU hazırla. Prompt, baskıya uygun olması için izole (isolated, clean solid background) detaylarını içermelidir.",
+            expected_output='Sadece İngilizce Ana Tasarım Promptu.',
             agent=tasarimci_ajan
         )
 
         gorev3 = Task(
-            description=f"Ana tasarıma ve '{magaza['hedef_bolge']}' kültürüne uygun '{magaza['urun_tipleri']}' için 3 farklı mockup promptu hazırla (Lifestyle, Flatlay, Macro). Yalnızca İngilizce prompt metinlerini liste halinde ver.",
+            description=f"Belirlenen tasarım için listelemede kullanılacak 3 farklı İngilizce MOCKUP PROMPTU hazırla: 1. Kapak görseli için Lifestyle Mockup Prompt (Hedef bölge olan '{magaza['hedef_bolge']}' ortamına uygun). 2. Flatlay Mockup Prompt. 3. Alternatif / Detay (Macro) Mockup Prompt. Sadece bu 3 promptu liste halinde ver.",
             expected_output='3 adet mockup senaryosu içeren İngilizce prompt listesi.',
             agent=mockup_ajani
         )
 
         gorev4 = Task(
-            description=f"Seçilen ürün ({magaza['urun_tipleri']}) ve hedef bölge için Etsy standartlarında 1 adet İngilizce başlık, 13 adet etiket ve SEO uyumlu ürün açıklaması yaz.",
-            expected_output='Başlık, etiketler ve açıklama metni.',
+            description=f"Önceki ajanların ürettiği verileri topla. 1) Önerilen nişi açıkla. 2) Tasarımcı ajanın yazdığı ANA TASARIM PROMPTU'nu ekle. 3) Mockup ajanının yazdığı 3 MOCKUP PROMPTU'nu ekle. 4) Son olarak bu ürün için Etsy standartlarında 1 İngilizce başlık, 13 etiket (tags) ve ürün açıklaması (description) yaz. Tüm bunları Markdown formatında düzenli bir rapor olarak sun.",
+            expected_output='Ana prompt, mockup promptları ve SEO verilerini içeren düzenli Markdown raporu.',
             agent=seo_ajani
         )
 
-        # Ajans ekibini oluştur ve göreve başlat
         etsy_sirketi = Crew(
             agents=[arge_ajani, tasarimci_ajan, mockup_ajani, seo_ajani],
             tasks=[gorev1, gorev2, gorev3, gorev4],
@@ -107,31 +88,22 @@ if __name__ == "__main__":
         )
         
         sonuc = etsy_sirketi.kickoff()
-        
-        print(f"🎨 {magaza['adi']} için görsel üretiliyor...")
-        gorsel_linki = gorsel_uret(str(sonuc))
         temiz_sonuc = str(sonuc).replace('"', '\\"')
         
-        # Mağazaya özel rapor bloku
         rapor_metni = f"""
 ### 🛍️ MAĞAZA: {magaza['adi']}
 *Hedef Ürünler: {magaza['urun_tipleri']}*
 
-#### 🎯 AR-GE & SEO SONUÇLARI
 {temiz_sonuc}
-
-#### 👕 ÜRETİLEN ANA TASARIM
-[Tasarımı Yüksek Kalitede İndirmek İçin Tıklayın]({gorsel_linki})
 
 ---
 """
-        # Raporu GitHub paneline ekle
         if github_summary:
             with open(github_summary, "a", encoding="utf-8") as f:
                 f.write(rapor_metni)
                 
     # GitHub Action çökmemesi için dummy dosya
     with open("ekrana_yaz.sh", "w", encoding="utf-8") as f:
-        f.write("echo '✅ Tüm mağazaların işlemleri tamamlandı.'")
+        f.write("echo '✅ Tüm mağazaların işlemleri ve prompt üretimleri tamamlandı.'")
         
     print("✅ Tüm mağazaların işlemleri başarıyla tamamlandı ve rapor oluşturuldu.")
