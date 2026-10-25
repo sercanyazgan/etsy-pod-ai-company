@@ -88,4 +88,31 @@ if __name__ == "__main__":
     sonuc = etsy_sirketi.kickoff()
     
     print("🎨 Görsel Arka Planda Üretiliyor...")
-    # Görsel komutunu otomatik alıp
+    # Görsel komutunu otomatik alıp DALL-E'ye gönderiyoruz
+    gorsel_linki = gorsel_uret(str(sonuc))
+    
+    # HATA ÇÖZÜMÜ: Çift tırnakları GitHub'ın okuyabileceği formata çeviriyoruz
+    temiz_sonuc = str(sonuc).replace('"', '\\"')
+    
+    # Doğrudan GitHub paneline yazdırılacak Markdown rapor metni
+    rapor_metni = f"""
+### 📈 ETSY GÜNLÜK ÜRETİM RAPORU
+
+#### 🎯 1. AR-GE & SEO SONUÇLARI
+{temiz_sonuc}
+
+#### 👕 2. ÜRETİLEN ANA TASARIM
+[Tasarımı Yüksek Kalitede İndirmek İçin Tıklayın]({gorsel_linki})
+"""
+    
+    # YÖNTEM DEĞİŞİKLİĞİ: Bash dosyası yerine doğrudan GitHub sistemine yazıyoruz (En güvenli yöntem)
+    github_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if github_summary:
+        with open(github_summary, "a", encoding="utf-8") as f:
+            f.write(rapor_metni)
+            
+    # otomasyon.yml içindeki "Raporu Ekrana Kilitle" adımının hata vermemesi için boş dosya oluşturuyoruz
+    with open("ekrana_yaz.sh", "w", encoding="utf-8") as f:
+        f.write("echo '✅ İşlem tamamlandı, rapor Python tarafından başarıyla yazdırıldı.'")
+        
+    print("✅ Tüm işlemler başarıyla tamamlandı ve rapor oluşturuldu.")
